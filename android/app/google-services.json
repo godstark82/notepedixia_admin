@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "900661187754",
+    "project_id": "notepedixia-788d5",
+    "storage_bucket": "notepedixia-788d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900661187754:android:3bbe19b98235fd47a56cd3",
+        "android_client_info": {
+          "package_name": "com.example.notepedixia_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "900661187754-msl6shpedi4ji2b9kdce8uaiahfmv7ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8uAaIRT_1PwZd5TQoTzu2jQo_jhDVzwA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "900661187754-msl6shpedi4ji2b9kdce8uaiahfmv7ci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "900661187754-sn594b8t5tn102ht2ere2nviugebf442.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.notepedixia"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900661187754:android:2d0b9ccc82c4d7dfa56cd3",
+        "android_client_info": {
+          "package_name": "com.venom82.notepedixia"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "900661187754-mrlltjjvfurajreopma42fgniqmbrukp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.venom82.notepedixia",
+            "certificate_hash": "b36ecf991309614e962e0509761e8ca9453b7368"
+          }
+        },
+        {
+          "client_id": "900661187754-msl6shpedi4ji2b9kdce8uaiahfmv7ci.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8uAaIRT_1PwZd5TQoTzu2jQo_jhDVzwA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "900661187754-msl6shpedi4ji2b9kdce8uaiahfmv7ci.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "900661187754-sn594b8t5tn102ht2ere2nviugebf442.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.notepedixia"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
