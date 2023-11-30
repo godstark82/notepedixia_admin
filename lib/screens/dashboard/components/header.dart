@@ -1,8 +1,8 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
+import 'package:notepedixia_admin/constants.dart';
 import 'package:notepedixia_admin/responsive.dart';
-
-
-import '../../../constants.dart';
 
 class Header extends StatelessWidget {
   const Header({Key? key, required this.title, required this.widget})
@@ -13,17 +13,12 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (!Responsive.isDesktop(context))
-          IconButton(
-            icon: const Icon(Icons.menu),
-            onPressed: () {},
-          ),
-        if (!Responsive.isMobile(context))
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         if (!Responsive.isMobile(context))
           Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
         // Expanded(child: SearchField()),
@@ -41,8 +36,8 @@ class ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: defaultPadding),
-      padding: const EdgeInsets.symmetric(
+      margin: EdgeInsets.only(left: defaultPadding),
+      padding: EdgeInsets.symmetric(
         horizontal: defaultPadding,
         vertical: defaultPadding / 2,
       ),
@@ -58,9 +53,8 @@ class ProfileCard extends StatelessWidget {
             height: 38,
           ),
           if (!Responsive.isMobile(context))
-            const Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
               child: Text("Angelina Jolie"),
             ),
           const Icon(Icons.keyboard_arrow_down),
@@ -89,9 +83,9 @@ class SearchField extends StatelessWidget {
         suffixIcon: InkWell(
           onTap: () {},
           child: Container(
-            padding: const EdgeInsets.all(defaultPadding * 0.75),
-            margin: const EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-            decoration: const BoxDecoration(
+            padding: EdgeInsets.all(defaultPadding * 0.75),
+            margin: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+            decoration: BoxDecoration(
               color: primaryColor,
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),

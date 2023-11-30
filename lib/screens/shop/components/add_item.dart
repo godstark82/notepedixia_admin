@@ -3,10 +3,11 @@
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:image_picker_web/image_picker_web.dart';
-import 'package:notepedixia_admin/const/const.dart';
+import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/func/items_fun.dart';
+import 'package:notepedixia_admin/func/functions.dart';
 import 'package:notepedixia_admin/responsive.dart';
 import 'package:notepedixia_admin/screens/main/main_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
@@ -19,7 +20,7 @@ class AddItemsToAppScreen extends StatefulWidget {
 }
 
 class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
-  String name = '';
+  String title = '';
   String shortInfo = '';
   String longInfo = '';
   String price = '';
@@ -62,19 +63,43 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                 ),
               ),
               onPressed: () async {
-                await ItemsClassForGoDown.createItem(
-                  imagesLinks,
-                  ordertitle: name,
-                  price: price,
-                  longInfo: longInfo,
-                  shortInfo: shortInfo,
-                  category: dropDownValue != ''
-                      ? dropDownValue
-                      : createCategories().first.value,
-                );
-
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const MainScreen()));
+                if (title.isNotEmptyAndNotNull &&
+                    price.isNotEmptyAndNotNull &&
+                    imagesLinks.isNotEmpty &&
+                    longInfo.isNotEmptyAndNotNull &&
+                    shortInfo.isNotEmptyAndNotNull) {
+                  Loader.show(context,
+                      overlayColor: Colors.white.withOpacity(0.1));
+                  await ItemsClass.createItem(
+                    imagesLinks,
+                    ordertitle: title,
+                    price: price,
+                    longInfo: longInfo,
+                    shortInfo: shortInfo,
+                    category: dropDownValue != ''
+                        ? dropDownValue
+                        : createCategories().first.value,
+                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const MainScreen()));
+                  Loader.hide();
+                } else {
+                  showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                            title: const Text('Can not Add'),
+                            content: const Text('Kindly Fill all the values'),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Ok'))
+                            ],
+                          ));
+                }
               },
               icon: const Icon(Icons.add),
               label: const Text("Add item to Godown"),
@@ -84,8 +109,8 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
       ),
       body: SingleChildScrollView(
         child: Container(
-          margin:
-              const EdgeInsets.all(defaultPadding + 6).copyWith(left: width * 0.25),
+          margin: const EdgeInsets.all(defaultPadding + 6)
+              .copyWith(left: width * 0.25),
           padding: const EdgeInsets.all(6),
           width: width * 0.5,
           decoration: const BoxDecoration(color: secondaryColor),
@@ -100,7 +125,7 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                     width: width * 0.7,
                     child: TextField(
                       onChanged: (value) {
-                        name = value;
+                        title = value;
                       },
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -204,7 +229,8 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
       children: [
         SizedBox(
             width: MediaQuery.of(context).size.width * 0.05,
-            child: Text(heading, style: const TextStyle(color: Colors.white54))),
+            child:
+                Text(heading, style: const TextStyle(color: Colors.white54))),
         const SizedBox(width: defaultPadding),
         SizedBox(
             width: MediaQuery.of(context).size.width * 0.40, child: widget),
@@ -214,13 +240,15 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
 
   // Method to pick image in flutter web
   Future<void> pickImage() async {
+    String uniqueName = DateTime.now().toString();
+    print(uniqueName);
     // Pick image using image_picker package
     Uint8List? file = await ImagePickerWeb.getImageAsBytes();
 
     Future<void> uploadImage() async {
       //
       final refRoot = FirebaseStorage.instance.ref().child('images');
-      final ref = refRoot.child('$counter${imagesLinks.length}');
+      final ref = refRoot.child(uniqueName);
       final metadata = SettableMetadata(contentType: 'image/jpeg');
       await ref.putData(file!, metadata);
       final dlLink = await ref.getDownloadURL();
@@ -228,13 +256,15 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
       print(imagesLinks.first);
     }
 
+    Loader.show(context,overlayColor: Colors.white.withOpacity(0.1));
     await uploadImage();
+    Loader.hide();
     print('Image uplaodded');
   }
 
   Widget imageTile(int index) {
     return Container(
-      margin: const EdgeInsets.all(defaultPadding+8),
+      margin: const EdgeInsets.all(defaultPadding + 8),
       decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade600),
           borderRadius: BorderRadius.circular(12)),
@@ -245,7 +275,6 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
         children: [
           Image.network(
             imagesLinks[index],
-            
             errorBuilder: (context, error, stackTrace) {
               return "Error Occur".text.makeCentered();
             },

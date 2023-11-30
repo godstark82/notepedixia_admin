@@ -1,9 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/const/const.dart';
+import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/func/items_fun.dart';
+import 'package:notepedixia_admin/func/functions.dart';
 import 'package:notepedixia_admin/responsive.dart';
 import 'package:notepedixia_admin/screens/dashboard/components/header.dart';
 
@@ -53,7 +53,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                     child: const Text('Cancel')),
                                 TextButton(
                                     onPressed: () async {
-                                      await ItemsClassForGoDown.createCategory(
+                                      await ItemsClass.createCategory(
                                           categoryString);
                                       setState(() {});
                                       Navigator.pop(context);
@@ -116,7 +116,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                       child: const Text('No')),
                                   TextButton(
                                       onPressed: () async {
-                                        await ItemsClassForGoDown
+                                        await ItemsClass
                                                 .deleteCategory(idx)
                                             .then((value) {
                                           setState(() {});

@@ -1,9 +1,9 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/const/const.dart';
+import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/func/items_fun.dart';
+import 'package:notepedixia_admin/func/functions.dart';
 import 'package:notepedixia_admin/models/itemforsell_model.dart';
 import 'package:notepedixia_admin/responsive.dart';
 import 'package:notepedixia_admin/screens/dashboard/components/header.dart';
@@ -68,12 +68,12 @@ class _ShopScreenState extends State<ShopScreen> {
                 title: Text('${value[idx].title}'),
                 leading: Text('${idx + 1}'),
                 trailing: SizedBox(
-                  width: 175,
+                  width:Responsive.isDesktop(context)? 175: 125,
                   child: Row(
                     children: [
                       MaterialButton(
                           onPressed: () async {
-                            await ItemsClassForGoDown.deleteItem(idx);
+                            await ItemsClass.deleteItem(idx);
                             setState(() {});
                           },
                           child: const Icon(
@@ -87,6 +87,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                 MaterialPageRoute(
                                     builder: (context) => EditItemsToAppScreen(
                                           idx: value[idx].id!,
+                                          imageLinks: value[idx].imageLinks,
                                           price: value[idx].price!,
                                           title: value[idx].title!,
                                           shortInfo: value[idx].shortInfo!,

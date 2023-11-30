@@ -1,6 +1,11 @@
+// ignore_for_file: unrelated_type_equality_checks
+
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/controllers/MenuAppController.dart';
+import 'package:notepedixia_admin/const/database.dart';
+import 'package:notepedixia_admin/controllers/screens.dart';
 import 'package:notepedixia_admin/responsive.dart';
+import 'package:notepedixia_admin/screens/account/account.dart';
+import 'package:notepedixia_admin/screens/settings/settings.dart';
 
 import 'components/side_menu.dart';
 
@@ -16,6 +21,34 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: sideMenu(),
+      appBar: Responsive.isDesktop(context)
+          ? AppBar(
+              leading: const SizedBox(),
+              title: const Text('Notepediax Admin Panel'),
+              actions: [
+                IconButton(
+                    tooltip: 'Profile',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const AccountScreen()));
+                    },
+                    icon: const Icon(Icons.person)),
+                IconButton(
+                    tooltip: 'Settings',
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SettingsScreen()));
+                    },
+                    icon: const Icon(Icons.settings)),
+              ],
+            )
+          : AppBar(
+              title: const Text('Notepediax'),
+            ),
       body: SafeArea(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,7 +115,17 @@ class _MainScreenState extends State<MainScreen> {
           ),
           DrawerListTile(
             index: 4,
-            title: "Notification",
+            title: "Notifications",
+            badge: notifications.isNotEmpty
+                ? Container(
+                  width: 25,
+                  height: 25,
+                  
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(500),
+                        color: Colors.red),
+                    child: Center(child: Text(notifications.length.toString())))
+                : const SizedBox(),
             svgSrc: "assets/icons/menu_notification.svg",
             press: () {
               currentIndex = 4;

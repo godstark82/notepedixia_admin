@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/controllers/MenuAppController.dart';
+import 'package:notepedixia_admin/controllers/screens.dart';
 
 class DrawerListTile extends StatelessWidget {
   const DrawerListTile({
@@ -13,11 +13,13 @@ class DrawerListTile extends StatelessWidget {
     required this.svgSrc,
     required this.press,
     required this.index,
+    this.badge,
   }) : super(key: key);
 
   final String title, svgSrc;
   final VoidCallback press;
   final int index;
+  final Widget? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +34,16 @@ class DrawerListTile extends StatelessWidget {
         height: 16,
         color: Colors.white54,
       ),
-      title: Text(
-        title,
-        style: TextStyle(
-            color: index != currentIndex ? Colors.white54 : Colors.white),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+                color: index != currentIndex ? Colors.white54 : Colors.white),
+          ),
+          badge ?? const SizedBox()
+        ],
       ),
     );
   }
