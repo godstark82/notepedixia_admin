@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:notepedixia_admin/const/database.dart';
-import 'package:notepedixia_admin/constants.dart';
+import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/func/functions.dart';
-import 'package:notepedixia_admin/responsive.dart';
+import 'package:notepedixia_admin/const/responsive.dart';
 import 'package:notepedixia_admin/screens/main/main_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -46,10 +46,10 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
 
   List<DropdownMenuItem> createCategories() {
     return List.generate(
-        category.length,
+        categoryName.length,
         (index) => DropdownMenuItem(
-              value: category[index].toString(),
-              child: Text(category[index].toString()),
+              value: categoryName[index].toString(),
+              child: Text(categoryName[index].toString()),
             ));
   }
 

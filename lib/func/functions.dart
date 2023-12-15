@@ -15,14 +15,20 @@
 ///
 ///  2. [OrdersClass] has following functions -
 ///     - [OrdersClass.init] : Main Init Functions to use all init functions inside it.
-///     - [OrdersClass.getOrders] : This fetch any new Order from User, [init] function.
+///     - [OrdersClass.getPendingOrders] : This fetch any new Order from User, [init] function.
 ///     - [OrdersClass.getNotifications] : To Fetch Notification when a new Order is there, [init] function.
 ///
 ///
 ////.
+library;
+// ignore_for_file: avoid_print, unused_local_variable
+
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker_web/image_picker_web.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/models/itemforsell_model.dart';
 
@@ -34,7 +40,9 @@ class ItemsClass {
   // initializing all init functions
   static init() async {
     await getItems();
+
     await getCategories();
+    await getCarouselItems();
     debugPrint('ItemsClass initialized');
   }
 
@@ -103,6 +111,70 @@ class ItemsClass {
     await getItems();
   }
 
+  // fn for fetching carouselItems from Firebase
+  static Future<void> getCarouselItems() async {
+    final data = await firestore
+        .collection('admin')
+        .doc('carousel')
+        .collection('carousel-items')
+        .get();
+    localData.value['carousel'] = [];
+    for (int i = 0; i < data.docs.length; i++) {
+      localData.value['carousel']?.add({
+        'id': data.docs[i].data()['id'],
+        'img': data.docs[i].data()['img'],
+        'title': data.docs[i].data()['title'],
+        'price': data.docs[i].data()['price']
+      });
+    }
+  }
+
+  static Future<void> createCarouselItems(
+      ItemForSaleModel item, String id, String image) async {
+    final data = await firestore
+        .collection('admin')
+        .doc('carousel')
+        .collection('carousel-items')
+        .add({
+      'id': id,
+      'title': item.title,
+      'shortInfo': item.shortInfo,
+      'category': item.category,
+      'longInfo': item.longInfo,
+      'price': item.price,
+      'images': item.imageLinks,
+      'img': image,
+    });
+    await getCarouselItems();
+    print('Carousel Created');
+  }
+
+  static Future<void> deleteCarouselItem(String id) async {
+    final data = await firestore
+        .collection('admin')
+        .doc('carousel')
+        .collection('carousel-items')
+        .get();
+    int? index;
+    final docs = data.docs;
+    for (int i = 0; i < docs.length; i++) {
+      final doc = docs[i].data();
+      if (doc['id'] == id) {
+        index = i;
+        break;
+      }
+    }
+    final doc = docs[index!].id;
+    await firestore
+        .collection('admin')
+        .doc('carousel')
+        .collection('carousel-items')
+        .doc(doc)
+        .delete();
+    await getCarouselItems();
+    print('Doc Deleted');
+  }
+
   // fn for fetching data from firebase
   static Future getItems() async {
     items.value.clear();
@@ -139,28 +211,49 @@ class ItemsClass {
   // get categories from Firestore
   //
 
+  static Future<String> uploadImage() async {
+    // Method to pick image in flutter web
+
+    String uniqueName = DateTime.now().toString();
+    // Pick image using image_picker package
+    Uint8List? file = await ImagePickerWeb.getImageAsBytes();
+
+    //
+    final refRoot = FirebaseStorage.instance.ref().child('images');
+    final ref = refRoot.child(uniqueName);
+    final metadata = SettableMetadata(contentType: 'image/jpeg');
+    await ref.putData(file!, metadata);
+    final dlLink = await ref.getDownloadURL();
+    return dlLink;
+  }
+
   static Future getCategories() async {
     var cat = await firestore.collection('admin').doc('category').get();
     var mappedCategory = cat.data();
-    category =
+    categoryName =
         (mappedCategory?['category'] as List).map((e) => e as String).toList();
+            categoryImg =
+        (mappedCategory?['category-img'] as List).map((e) => e as String).toList();
   }
 
   // create a new Category
-  static Future createCategory(String newCategory) async {
-    category.add(newCategory);
+  static Future createCategory(String newCategory, String catImg) async {
+    categoryName.add(newCategory);
+    categoryImg.add(catImg);
     await firestore.collection('admin').doc('category').update({
-      'category': category,
+      'category': categoryName,
+      'category-img': categoryImg,
     });
   }
 
   //
   static Future deleteCategory(int index) async {
-    category.removeAt(index);
-    await firestore
-        .collection('admin')
-        .doc('category')
-        .update({'category': category});
+    categoryName.removeAt(index);
+    categoryImg.removeAt(index);
+    await firestore.collection('admin').doc('category').update({
+      'category': categoryName,
+      'category-img': categoryImg,
+    });
   }
 }
 
@@ -168,19 +261,71 @@ class OrdersClass {
   static final admin = FirebaseFirestore.instance.collection('admin');
 
   static Future<void> init() async {
-    await getOrders();
+    await getCompletedOrders();
+    await getPendingOrders();
+    await getRejectedOrders();
     await getNotifications();
     debugPrint('Orders and Notifications initialize');
   }
 
-  static Future<void> getOrders() async {
-    final data = await admin.doc('orders').get();
+  static Future<void> getPendingOrders() async {
+    final data = await admin.doc('pending-orders').get();
     final mapped = data.data() ?? {};
 
     // orders variables
-    final cloudOrders = mapped['orders'] ?? [];
-    localData.value['orders'] = [];
-    final localOrders = localData.value['orders'] ?? [];
+    final cloudOrders = mapped['pending-orders'] ?? [];
+    localData.value['pending-orders'] = [];
+    final localOrders = localData.value['pending-orders'] ?? [];
+
+    //loop to get data
+    for (int i = 0; i < cloudOrders.length; i++) {
+      localOrders.add({
+        'id': cloudOrders[i]['id'],
+        'uid': cloudOrders[i]['uid'],
+        'title': cloudOrders[i]['title'],
+        'shortInfo': cloudOrders[i]['shortInfo'],
+        'longInfo': cloudOrders[i]['longInfo'],
+        'quantity': cloudOrders[i]['quantity'],
+        'images': cloudOrders[i]['images'],
+        'status': cloudOrders[i]['status'],
+        'trackingID': cloudOrders[i]['trackingID']
+      });
+    }
+  }
+
+  static Future<void> getCompletedOrders() async {
+    final data = await admin.doc('completed-orders').get();
+    final mapped = data.data() ?? {};
+
+    // orders variables
+    final cloudOrders = mapped['completed-orders'] ?? [];
+    localData.value['completed-orders'] = [];
+    final localOrders = localData.value['completed-orders'] ?? [];
+
+    //loop to get data
+    for (int i = 0; i < cloudOrders.length; i++) {
+      localOrders.add({
+        'id': cloudOrders[i]['id'],
+        'uid': cloudOrders[i]['uid'],
+        'title': cloudOrders[i]['title'],
+        'shortInfo': cloudOrders[i]['shortInfo'],
+        'longInfo': cloudOrders[i]['longInfo'],
+        'quantity': cloudOrders[i]['quantity'],
+        'images': cloudOrders[i]['images'],
+        'status': cloudOrders[i]['status'],
+        'trackingID': cloudOrders[i]['trackingID']
+      });
+    }
+  }
+
+  static Future<void> getRejectedOrders() async {
+    final data = await admin.doc('rejected-orders').get();
+    final mapped = data.data() ?? {};
+
+    // orders variables
+    final cloudOrders = mapped['rejected-orders'] ?? [];
+    localData.value['rejected-orders'] = [];
+    final localOrders = localData.value['rejected-orders'] ?? [];
 
     //loop to get data
     for (int i = 0; i < cloudOrders.length; i++) {
@@ -219,6 +364,7 @@ class OrdersClass {
     List<Map> orders = userOrdersMap['orders'];
     final index = orders.indexWhere((element) => element['id'] == orderID);
     orders[index]['status'] = newStatus.toString().toUpperCase();
+
     print(orders);
 
     // after fetching and updating list of specific user upload it back to firestore

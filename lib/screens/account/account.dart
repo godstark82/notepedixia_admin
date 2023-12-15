@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/constants.dart';
+import 'package:notepedixia_admin/const/constants.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class AccountScreen extends StatefulWidget {

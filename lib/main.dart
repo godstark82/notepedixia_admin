@@ -1,8 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
-import 'package:notepedixia_admin/constants.dart';
+import 'package:notepedixia_admin/const/database.dart';
+import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/firebase_options.dart';
 import 'package:notepedixia_admin/func/functions.dart';
 import 'package:notepedixia_admin/screens/login/login_screen.dart';
@@ -18,6 +22,7 @@ void main(List<String> args) async {
   await Hive.openBox('cache');
   isLogined = Hive.box('cache').get('login') ?? false;
   runApp(const Dashboard());
+  print(localData.value['carousel']);
 }
 
 class Dashboard extends StatelessWidget {
@@ -26,7 +31,7 @@ class Dashboard extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Notepedixia Admin',
       theme: ThemeData.dark().copyWith(

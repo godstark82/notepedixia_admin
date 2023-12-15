@@ -5,11 +5,11 @@ class ItemForSaleModel {
   final List imageLinks;
 
   ItemForSaleModel(
-      {this.title,
-      this.shortInfo,
-      this.longInfo,
-      this.price,
-      this.id,
+      {required this.title,
+      required this.shortInfo,
+      required this.longInfo,
+      required this.price,
+      required this.id,
       required this.category,
       required this.imageLinks});
 }

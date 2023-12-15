@@ -1,14 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
-import 'dart:typed_data';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
-import 'package:image_picker_web/image_picker_web.dart';
 import 'package:notepedixia_admin/const/database.dart';
-import 'package:notepedixia_admin/constants.dart';
+import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/func/functions.dart';
-import 'package:notepedixia_admin/responsive.dart';
+import 'package:notepedixia_admin/const/responsive.dart';
 import 'package:notepedixia_admin/screens/main/main_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
@@ -29,10 +26,10 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
 
   List<DropdownMenuItem> createCategories() {
     return List.generate(
-        category.length,
+        categoryName.length,
         (index) => DropdownMenuItem(
-              value: category[index].toString(),
-              child: Text(category[index].toString()),
+              value: categoryName[index].toString(),
+              child: Text(categoryName[index].toString()),
             ));
   }
 
@@ -204,7 +201,9 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                       const Expanded(child: SizedBox()),
                       TextButton(
                           onPressed: () async {
-                            await pickImage();
+                            Loader.show(context);
+                            imagesLinks.add(await ItemsClass.uploadImage());
+                            Loader.hide();
                             setState(() {});
                           },
                           child: "Add Image".text.make())
@@ -212,6 +211,7 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                 ListView.builder(
                     shrinkWrap: true,
                     itemCount: imagesLinks.length,
+                    
                     itemBuilder: (context, index) {
                       return imageTile(index);
                     })
@@ -236,30 +236,6 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
             width: MediaQuery.of(context).size.width * 0.40, child: widget),
       ],
     );
-  }
-
-  // Method to pick image in flutter web
-  Future<void> pickImage() async {
-    String uniqueName = DateTime.now().toString();
-    print(uniqueName);
-    // Pick image using image_picker package
-    Uint8List? file = await ImagePickerWeb.getImageAsBytes();
-
-    Future<void> uploadImage() async {
-      //
-      final refRoot = FirebaseStorage.instance.ref().child('images');
-      final ref = refRoot.child(uniqueName);
-      final metadata = SettableMetadata(contentType: 'image/jpeg');
-      await ref.putData(file!, metadata);
-      final dlLink = await ref.getDownloadURL();
-      imagesLinks.add(dlLink);
-      print(imagesLinks.first);
-    }
-
-    Loader.show(context,overlayColor: Colors.white.withOpacity(0.1));
-    await uploadImage();
-    Loader.hide();
-    print('Image uplaodded');
   }
 
   Widget imageTile(int index) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/responsive.dart';
+import 'package:notepedixia_admin/const/constants.dart';
+import 'package:notepedixia_admin/const/responsive.dart';
 import 'components/header.dart';
 
 class DashboardScreen extends StatelessWidget {

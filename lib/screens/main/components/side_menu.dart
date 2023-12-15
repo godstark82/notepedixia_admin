@@ -2,19 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:notepedixia_admin/constants.dart';
+import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/controllers/screens.dart';
 
 class DrawerListTile extends StatelessWidget {
   const DrawerListTile({
-    Key? key,
+    super.key,
     // For selecting those three line once press "Command+D"
     required this.title,
     required this.svgSrc,
     required this.press,
     required this.index,
     this.badge,
-  }) : super(key: key);
+  });
 
   final String title, svgSrc;
   final VoidCallback press;

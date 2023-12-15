@@ -1,12 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:notepedixia_admin/constants.dart';
-import 'package:notepedixia_admin/responsive.dart';
+import 'package:notepedixia_admin/const/constants.dart';
+import 'package:notepedixia_admin/const/responsive.dart';
 
 class Header extends StatelessWidget {
-  const Header({Key? key, required this.title, required this.widget})
-      : super(key: key);
+  const Header({super.key, required this.title, required this.widget});
   final String title;
   final Widget widget;
 
@@ -30,8 +29,8 @@ class Header extends StatelessWidget {
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +65,8 @@ class ProfileCard extends StatelessWidget {
 
 class SearchField extends StatelessWidget {
   const SearchField({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

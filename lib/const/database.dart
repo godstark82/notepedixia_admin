@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:notepedixia_admin/models/itemforsell_model.dart';
 
-List<String> category = [];
+List<String> categoryName = [];
+List<String> categoryImg = [];
 final ValueNotifier<List<ItemForSaleModel>> items = ValueNotifier([]);
 final ValueNotifier<Map<String, List<Map<String, dynamic>>>> localData =
     ValueNotifier({});
