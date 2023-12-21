@@ -65,7 +65,10 @@ class _ShopScreenState extends State<ShopScreen> {
         builder: (_, value, child) {
           return value.isEmpty
               ? const EmptyScreen()
-              : ListView.builder(
+              : ListView.separated(
+                  separatorBuilder: (context, index) {
+                    return const Divider();
+                  },
                   itemBuilder: (context, idx) {
                     return ListTile(
                       title: Text('${value[idx].title}'),
@@ -90,14 +93,18 @@ class _ShopScreenState extends State<ShopScreen> {
                                       MaterialPageRoute(
                                           builder: (context) =>
                                               EditItemsToAppScreen(
+                                                tags: value[idx].tags,
                                                 idx: value[idx].id!,
-                                                imageLinks:
-                                                    value[idx].imageLinks,
+                                                imageLinks: value[idx].images,
                                                 price: value[idx].price!,
                                                 title: value[idx].title!,
-                                                shortInfo:
-                                                    value[idx].shortInfo!,
-                                                longInfo: value[idx].longInfo!,
+                                                description:
+                                                    value[idx].description!,
+                                                condition:
+                                                    value[idx].condition!,
+                                                cover: value[idx].cover!,
+                                                language: value[idx].language!,
+                                                pages: value[idx].pages!,
                                                 category: categoryName[idx],
                                               )));
                                 },

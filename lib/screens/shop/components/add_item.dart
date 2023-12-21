@@ -18,10 +18,14 @@ class AddItemsToAppScreen extends StatefulWidget {
 
 class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
   String title = '';
-  String shortInfo = '';
-  String longInfo = '';
+  String description = '';
+  String pages = '';
+  String condition = '';
+  String cover = '';
+  String language = '';
   String price = '';
   String dropDownValue = '';
+  List<String> tags = [];
   List<String> imagesLinks = [];
 
   List<DropdownMenuItem> createCategories() {
@@ -63,16 +67,23 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                 if (title.isNotEmptyAndNotNull &&
                     price.isNotEmptyAndNotNull &&
                     imagesLinks.isNotEmpty &&
-                    longInfo.isNotEmptyAndNotNull &&
-                    shortInfo.isNotEmptyAndNotNull) {
+                    description.isNotEmptyAndNotNull &&
+                    pages.isNotEmptyAndNotNull &&
+                    condition.isNotEmptyAndNotNull &&
+                    language.isNotEmptyAndNotNull &&
+                    cover.isNotEmptyAndNotNull) {
                   Loader.show(context,
                       overlayColor: Colors.white.withOpacity(0.1));
                   await ItemsClass.createItem(
                     imagesLinks,
+                    tags: tags,
                     ordertitle: title,
+                    cover: cover,
+                    language: language,
+                    condition: condition,
+                    pages: pages,
                     price: price,
-                    longInfo: longInfo,
-                    shortInfo: shortInfo,
+                    description: description,
                     category: dropDownValue != ''
                         ? dropDownValue
                         : createCategories().first.value,
@@ -173,27 +184,101 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                     )),
                 const SizedBox(height: defaultPadding),
                 addList(
-                    'Shortinfo',
+                    'description',
                     TextField(
                       onChanged: (value) {
-                        shortInfo = value;
+                        description = value;
                       },
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          label: Text('Short Description')),
+                          label: Text('Description')),
                     )),
                 const SizedBox(height: defaultPadding),
                 addList(
-                    'Long Info',
+                    'Pages',
                     TextField(
                       onChanged: (value) {
-                        longInfo = value;
+                        pages = value;
                       },
-                      maxLines: 6,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(), label: Text('Pages')),
+                    )),
+                const SizedBox(height: defaultPadding),
+                addList(
+                    'Condition',
+                    TextField(
+                      onChanged: (value) {
+                        condition = value;
+                      },
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          label: Text('Long Description')),
+                          label: Text('Condition')),
                     )),
+                const SizedBox(height: defaultPadding),
+                addList(
+                    'language',
+                    TextField(
+                      onChanged: (value) {
+                        language = value;
+                      },
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Language')),
+                    )),
+                const SizedBox(height: defaultPadding),
+                addList(
+                    'Cover',
+                    TextField(
+                      onChanged: (value) {
+                        cover = value;
+                      },
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(), label: Text('Cover')),
+                    )),
+                if (tags.isNotEmpty) const SizedBox(height: defaultPadding),
+                if (tags.isNotEmpty)
+                  SizedBox(
+                    height: 50,
+                    child: ListView.builder(
+                        itemCount: tags.length,
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) => Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 4),
+                              child: Chip(
+                                label: Text(tags[index]),
+                                deleteButtonTooltipMessage: 'Delete',
+                                deleteIcon: const Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                ),
+                                onDeleted: () {
+                                  tags.removeAt(index);
+                                  setState(() {});
+                                },
+                              ),
+                            )),
+                  ),
+                const SizedBox(height: defaultPadding),
+                addList(
+                  'Tags',
+                  Row(children: [
+                    Expanded(
+                        child: TextFormField(
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(), label: Text('Tags')),
+                      controller: _tagController,
+                    )),
+                    TextButton(
+                        onPressed: () async {
+                          tags.add(_tagController.text);
+                          _tagController.clear();
+                          setState(() {});
+                        },
+                        child: "Add Tag".text.make())
+                  ]),
+                ),
                 const SizedBox(height: defaultPadding),
                 addList(
                     'Images',
@@ -211,7 +296,6 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                 ListView.builder(
                     shrinkWrap: true,
                     itemCount: imagesLinks.length,
-                    
                     itemBuilder: (context, index) {
                       return imageTile(index);
                     })
@@ -222,6 +306,8 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
       ),
     );
   }
+
+  final TextEditingController _tagController = TextEditingController();
 
   Widget addList(String heading, Widget widget) {
     return Row(

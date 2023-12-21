@@ -24,8 +24,11 @@ class _CarouselScreenState extends State<CarouselScreen> {
   Future<List<DropdownMenuItem>> allOrders() async {
     final item = items.value.isEmpty
         ? <DropdownMenuItem>[
-          const DropdownMenuItem(value: 'd',child: Text('No Data Found'),)
-        ]
+            const DropdownMenuItem(
+              value: 'd',
+              child: Text('No Data Found'),
+            )
+          ]
         : List.generate(
             items.value.length,
             (index) => DropdownMenuItem(
@@ -176,13 +179,19 @@ class _CarouselScreenState extends State<CarouselScreen> {
                   final item = items.value[index];
                   ItemsClass.createCarouselItems(
                       ItemForSaleModel(
+                          tags: item.tags,
+                          time: item.time,
+                          bgColor: item.bgColor,
                           title: item.title,
-                          shortInfo: item.shortInfo,
-                          longInfo: item.longInfo,
+                          description: item.description,
+                          pages: item.pages,
+                          condition: item.condition,
+                          cover: item.cover,
+                          language: item.language,
                           price: item.price,
                           id: dropDownValue,
                           category: item.category,
-                          imageLinks: item.imageLinks),
+                          images: item.images),
                       dropDownValue,
                       imagesLinks[0]);
 
@@ -212,80 +221,85 @@ class _CarouselScreenState extends State<CarouselScreen> {
           ),
         ],
       ),
-      body:items.value.isEmpty ? const Center(child: Text('Add Items in Shop First')) : StatefulBuilder(builder: (context, ststate) {
-        return Container(
-          margin: Responsive.isDesktop(context)
-              ? const EdgeInsets.all(defaultPadding + 6)
-                  .copyWith(left: width * 0.25)
-              : const EdgeInsets.all(0),
-          padding: const EdgeInsets.all(16),
-          width: width * 0.5,
-          decoration: const BoxDecoration(color: secondaryColor),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: defaultPadding),
-                FutureBuilder(
-                    future: allOrders(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return addList(
-                            context,
-                            'Product',
-                            Container(
-                              width: 100,
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.white),
-                              child: DropdownButton(
-                                style: const TextStyle(color: Colors.black),
-                                iconEnabledColor: Colors.black,
-                                dropdownColor: Colors.white,
-                                padding:
-                                    const EdgeInsets.only(left: 8, right: 8),
-                                underline: const Divider(
-                                  color: Colors.transparent,
-                                ),
-                                value: dropDownValue != ''
-                                    ? dropDownValue
-                                    // : allOrders().first.value,
-                                    : snapshot.data?.first.value,
-                                items: snapshot.data,
-                                onChanged: (value) {
-                                  dropDownValue = value;
-                                  ststate(() {});
-                                },
-                              ),
-                            ));
-                      } else if (snapshot.hasError) {
-                        return const Center(child: Text('Some Error Occur'));
-                      } else {
-                        return const CircularProgressIndicator();
-                      }
-                    }),
-                const SizedBox(height: defaultPadding),
-                addList(
-                    context,
-                    'Images',
-                    Row(children: [
-                      const Expanded(child: SizedBox()),
-                      if (imagesLinks.isEmpty)
-                        TextButton(
-                            onPressed: () async {
-                              Loader.show(context);
-                              imagesLinks.add(await ItemsClass.uploadImage());
-                              ststate(() {});
-                              Loader.hide();
-                            },
-                            child: "Add Image".text.make())
-                    ])),
-                if (imagesLinks.isNotEmpty) imageTile()
-              ],
-            ),
-          ),
-        );
-      }),
+      body: items.value.isEmpty
+          ? const Center(child: Text('Add Items in Shop First'))
+          : StatefulBuilder(builder: (context, ststate) {
+              return Container(
+                margin: Responsive.isDesktop(context)
+                    ? const EdgeInsets.all(defaultPadding + 6)
+                        .copyWith(left: width * 0.25)
+                    : const EdgeInsets.all(0),
+                padding: const EdgeInsets.all(16),
+                width: width * 0.5,
+                decoration: const BoxDecoration(color: secondaryColor),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: defaultPadding),
+                      FutureBuilder(
+                          future: allOrders(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return addList(
+                                  context,
+                                  'Product',
+                                  Container(
+                                    width: 100,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        color: Colors.white),
+                                    child: DropdownButton(
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                      iconEnabledColor: Colors.black,
+                                      dropdownColor: Colors.white,
+                                      padding: const EdgeInsets.only(
+                                          left: 8, right: 8),
+                                      underline: const Divider(
+                                        color: Colors.transparent,
+                                      ),
+                                      value: dropDownValue != ''
+                                          ? dropDownValue
+                                          // : allOrders().first.value,
+                                          : snapshot.data?.first.value,
+                                      items: snapshot.data,
+                                      onChanged: (value) {
+                                        dropDownValue = value;
+                                        ststate(() {});
+                                      },
+                                    ),
+                                  ));
+                            } else if (snapshot.hasError) {
+                              return const Center(
+                                  child: Text('Some Error Occur'));
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          }),
+                      const SizedBox(height: defaultPadding),
+                      addList(
+                          context,
+                          'Images',
+                          Row(children: [
+                            const Expanded(child: SizedBox()),
+                            if (imagesLinks.isEmpty)
+                              TextButton(
+                                  onPressed: () async {
+                                    Loader.show(context);
+                                    imagesLinks
+                                        .add(await ItemsClass.uploadImage());
+                                    ststate(() {});
+                                    Loader.hide();
+                                  },
+                                  child: "Add Image".text.make())
+                          ])),
+                      if (imagesLinks.isNotEmpty) imageTile()
+                    ],
+                  ),
+                ),
+              );
+            }),
     );
   }
 

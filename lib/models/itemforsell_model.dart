@@ -1,15 +1,33 @@
-// ignore_for_file: file_names
+import 'package:flutter/material.dart';
 
 class ItemForSaleModel {
-  final String? title, shortInfo, longInfo, price, id, category;
-  final List imageLinks;
-
+  String? id,
+      title,
+      price,
+      category,
+      description,
+      condition,
+      pages,
+      language,
+      cover,
+      time;
+  Color bgColor;
+  List tags;
+  List images;
   ItemForSaleModel(
-      {required this.title,
-      required this.shortInfo,
-      required this.longInfo,
-      required this.price,
-      required this.id,
+      {required this.bgColor,
+      required this.tags,
       required this.category,
-      required this.imageLinks});
+      required this.id,
+      required this.images,
+      required this.price,
+      required this.title,
+      required this.description,
+      required this.condition,
+      required this.pages,
+      required this.language,
+      required this.cover,
+      required this.time});
+
+  //
 }

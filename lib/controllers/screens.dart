@@ -5,6 +5,7 @@ import 'package:notepedixia_admin/screens/account/account.dart';
 import 'package:notepedixia_admin/screens/carousel/carousel.dart';
 import 'package:notepedixia_admin/screens/category/category.dart';
 import 'package:notepedixia_admin/screens/dashboard/dashboard_screen.dart';
+import 'package:notepedixia_admin/screens/filters/filters_screen.dart';
 import 'package:notepedixia_admin/screens/notifications/notifications.dart';
 import 'package:notepedixia_admin/screens/orders/completed_orders.dart';
 import 'package:notepedixia_admin/screens/orders/pending_orders.dart';
@@ -24,4 +25,5 @@ List<Widget> screens = [
   const Notifications(),
   const AccountScreen(),
   const SettingsScreen(),
+  const FiltersScreen(),
 ];

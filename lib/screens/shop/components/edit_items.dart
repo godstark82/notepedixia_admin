@@ -3,7 +3,6 @@
 import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
 import 'package:image_picker_web/image_picker_web.dart';
@@ -19,14 +18,22 @@ class EditItemsToAppScreen extends StatefulWidget {
       {super.key,
       required this.category,
       required this.idx,
-      required this.longInfo,
+      required this.description,
       required this.price,
-      required this.shortInfo,
+      required this.condition,
+      required this.cover,
+      required this.pages,
+      required this.language,
       required this.imageLinks,
+      required this.tags,
       required this.title});
   final String title;
-  final String shortInfo;
-  final String longInfo;
+  final String description;
+  final String cover;
+  final String pages;
+  final String language;
+  final String condition;
+  final List tags;
   final String price;
   final String idx;
   final String category;
@@ -38,11 +45,15 @@ class EditItemsToAppScreen extends StatefulWidget {
 
 class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
   String title = '';
-  String shortInfo = '';
-  String longInfo = '';
+  String description = '';
+  String cover = '';
+  String pages = '';
+  String condition = '';
+  String language = '';
   String price = '';
   String dropDownValue = '';
   List imageLink = [];
+  List tags = [];
 
   List<DropdownMenuItem> createCategories() {
     return List.generate(
@@ -57,8 +68,12 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
   void initState() {
     title = widget.title;
     price = widget.price;
-    shortInfo = widget.shortInfo;
-    longInfo = widget.longInfo;
+    condition = widget.condition;
+    cover = widget.cover;
+    description = widget.description;
+    pages = widget.pages;
+    language = widget.language;
+    tags = widget.tags;
     dropDownValue = widget.category;
     imageLink = widget.imageLinks;
     super.initState();
@@ -90,15 +105,18 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
                 if (title.isNotEmptyAndNotNull &&
                     price.isNotEmptyAndNotNull &&
                     imageLink.isNotEmpty &&
-                    longInfo.isNotEmptyAndNotNull &&
-                    shortInfo.isNotEmptyAndNotNull) {
+                    description.isNotEmptyAndNotNull) {
                   Loader.show(context,
                       overlayColor: Colors.white.withOpacity(0.1));
                   await ItemsClass.editItem(widget.idx.toString(),
                       title: title,
+                      tags: tags,
                       price: price,
-                      shortInfo: shortInfo,
-                      longInfo: longInfo,
+                      condition: condition,
+                      cover: cover,
+                      description: description,
+                      language: language,
+                      pages: pages,
                       category: dropDownValue);
                   Loader.hide();
                   Navigator.push(
@@ -196,29 +214,54 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
                     )),
                 const SizedBox(height: defaultPadding),
                 addList(
-                    'Shortinfo',
-                    TextFormField(
-                      initialValue: shortInfo,
+                    'description',
+                    TextField(
                       onChanged: (value) {
-                        shortInfo = value;
+                        description = value;
                       },
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           label: Text('Short Description')),
                     )),
-                const SizedBox(height: defaultPadding),
                 addList(
-                    'Long Info',
-                    TextFormField(
-                      initialValue: longInfo,
+                    'Pages',
+                    TextField(
                       onChanged: (value) {
-                        longInfo = value;
+                        pages = value;
                       },
-                      maxLines: 6,
-                      dragStartBehavior: DragStartBehavior.down,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          label: Text('Long Description')),
+                          label: Text('Short Description')),
+                    )),
+                addList(
+                    'Condition',
+                    TextField(
+                      onChanged: (value) {
+                        condition = value;
+                      },
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Short Description')),
+                    )),
+                addList(
+                    'language',
+                    TextField(
+                      onChanged: (value) {
+                        language = value;
+                      },
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Short Description')),
+                    )),
+                addList(
+                    'Cover',
+                    TextField(
+                      onChanged: (value) {
+                        cover = value;
+                      },
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text('Short Description')),
                     )),
                 const SizedBox(height: defaultPadding),
                 addList(

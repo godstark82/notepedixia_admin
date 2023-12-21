@@ -47,6 +47,9 @@ dependencies:
   flutter_overlay_loader: ^2.0.0
   responsive_grid: ^2.4.4
   get: ^4.6.6
+  palette_generator: ^0.3.3+3
+  cached_network_image: ^3.3.0
+  hexcolor: ^3.0.1
 
 dev_dependencies:
   flutter_test:

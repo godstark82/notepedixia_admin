@@ -1,9 +1,11 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/const/helper/empty_screen.dart';
+import 'package:notepedixia_admin/main.dart';
 import 'package:notepedixia_admin/models/order_model.dart';
 import 'package:notepedixia_admin/const/responsive.dart';
 import 'package:notepedixia_admin/screens/dashboard/components/header.dart';
@@ -18,6 +20,11 @@ class PendingOrdersScreen extends StatefulWidget {
 
 class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
@@ -25,7 +32,15 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
           padding: const EdgeInsets.all(defaultPadding),
           child: Column(
             children: [
-              const Header(title: 'Pending Orders', widget: SizedBox()),
+              Header(
+                  title: 'Pending Orders',
+                  widget: IconButton(
+                    onPressed: () async {
+                      await MainClass.init();
+                      setState(() {});
+                    },
+                    icon: const Icon(Icons.refresh),
+                  )),
               ordersList()
             ],
           ),
@@ -51,11 +66,12 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
       child: ValueListenableBuilder(
         valueListenable: localData,
         builder: (_, value, child) {
-          return (localData.value['pending-orders'] ?? []).isEmpty
+          return (localData.value['pending-orders'] ?? []).isEmpty ||
+                  localData.value['pending-orders'] == null
               ? const EmptyScreen()
               : ListView.builder(
                   itemBuilder: (context, idx) {
-                    final data = (localData.value['pending-orders'] ?? [])[idx];
+                    final data = localData.value['pending-orders'][idx];
                     return Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: Card(
@@ -67,30 +83,24 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
                               width: Responsive.isDesktop(context) ? 100 : 50,
                             ),
                             title: Text(
-                              '${data['title']}',
+                              'Order of ${data['title']} by user - ${data['uid']}',
                               style: const TextStyle(fontSize: 16),
                             ),
-                            subtitle: Text('By user - ${data['uid']}'),
+                            subtitle: Text('Address - ${data['address']}'),
                             onTap: () {
                               final order = OrderModel(
-                                id: data['id'] ?? '',
-                                images: data['images'] ?? '',
-                                longInfo: data['longInfo'] ?? '',
-                                price: data['price'] ?? '',
+                                address: data['address'],
+                                id: data['id'] ?? 'Not Fetched',
+                                images: data['images'] ?? [],
+                                trackingId: data['trackingId'],
+                                price: data['price'] ?? 'Not Fetched',
                                 quantity: data['quantity'] ?? 1,
-                                shortInfo: data['shortInfo'] ?? '',
-                                status: data['status'] ?? '',
-                                title: data['title'] ?? '',
-                                trackingID: data['trackingID'] ?? '',
-                                uid: data['uid'] ?? '',
+                                status: data['status'] ?? 'Not Fetched',
+                                title: data['title'] ?? 'Not Fetched',
+                                uid: data['uid'] ?? 'Not Fetched',
                               );
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => UpdateOrderScreen(
-                                      order: order,
-                                    ),
-                                  ));
+                              Get.to(() =>
+                                  UpdateOrderScreen(order: order, index: idx));
                             }),
                       ),
                     );

@@ -24,13 +24,16 @@ library;
 // ignore_for_file: avoid_print, unused_local_variable
 
 import 'dart:typed_data';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Image;
+import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/models/itemforsell_model.dart';
+import 'package:palette_generator/palette_generator.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 // ItemsClass to fetch items in goDown
 class ItemsClass {
@@ -43,6 +46,7 @@ class ItemsClass {
 
     await getCategories();
     await getCarouselItems();
+    await getFilters();
     debugPrint('ItemsClass initialized');
   }
 
@@ -59,14 +63,22 @@ class ItemsClass {
   }
 
   // this function create order for app database with a specific orderID
-  static Future<void> createItem(
-    List? imageLinks, {
-    String? ordertitle,
-    String? price,
-    String? category,
-    String? shortInfo,
-    String? longInfo,
-  }) async {
+  static Future<void> createItem(List? imageLinks,
+      {required String ordertitle,
+      required String? price,
+      required String? category,
+      required String? description,
+      required String? pages,
+      required List tags,
+      String? time,
+      required String? condition,
+      required String? cover,
+      required String? language}) async {
+    final pallete = await PaletteGenerator.fromImageProvider(
+        CachedNetworkImageProvider(imageLinks![0]),
+        maximumColorCount: 20);
+
+    final bgColor = pallete.dominantColor?.color.materialColor().toHex();
     // getting current Items as Snapshot
     final itemdoc = await firestore.collection('admin').doc('counter').get();
     // changing to Map
@@ -79,8 +91,14 @@ class ItemsClass {
       'price': price,
       'images': imageLinks,
       'category': category,
-      'longInfo': longInfo,
-      'shortInfo': shortInfo,
+      'description': description,
+      'cover': cover,
+      'tags': tags,
+      'condition': condition,
+      'pages': pages,
+      'time': DateTime.now().toString(),
+      'language': language,
+      'color': bgColor,
       'id': orderId.toString()
     }).then((value) async {
       // updating counter when item added
@@ -97,18 +115,71 @@ class ItemsClass {
   static Future<void> editItem(String id,
       {String? price,
       String? category,
-      String? longInfo,
-      String? shortInfo,
+      String? pages,
+      required List? tags,
+      String? condition,
+      String? cover,
+      String? language,
+      String? description,
+      String? time,
       String? title}) async {
     await firestore.collection('items').doc(id).update({
       'title': title,
       'price': price,
+      'tags': tags,
       'category': category,
-      'longInfo': longInfo,
-      'shortInfo': shortInfo,
-      'id': id
+      'description': description,
+      'cover': cover,
+      'language': language,
+      'pages': pages,
+      'condition': condition,
+      'id': id,
+      'time': DateTime.now().toString()
     });
     await getItems();
+  }
+
+  // fn for getting filters
+  static Future<void> getFilters() async {
+    localData.value['all-filters'] = [];
+    localData.value['notes-filters'] = [];
+    final filterDoc = await firestore.collection('admin').doc('filters').get();
+    localData.value['all-filters'] = filterDoc.data()?['all-filters'] ?? [];
+    localData.value['notes-filters'] = filterDoc.data()?['notes-filters'] ?? [];
+  }
+
+  //delete
+  static Future<void> deleteAllFilter(int index, bool isNotes) async {
+    if (isNotes) {
+      (localData.value['notes-filters'] as List).removeAt(index);
+    } else {
+      (localData.value['all-filters'] as List).removeAt(index);
+    }
+    firestore.collection('admin').doc('filters').update({
+      'all-filters': localData.value['all-filters'],
+      'notes-filters': localData.value['notes-filters'],
+    });
+  }
+
+  //
+  static Future<void> createFilters(
+      String filterName, bool isNoteFilter) async {
+    final filterDoc = firestore.collection('admin').doc('filters');
+    final currentData = await filterDoc.get();
+    final mappedData = currentData.data() ?? {};
+    List allFilters = mappedData['all-filters'] ?? [];
+    List notesFilters = mappedData['notes-filters'] ?? [];
+    if (isNoteFilter) {
+      // await filterDoc
+      notesFilters.add(filterName);
+    } else {
+      allFilters.add(filterName);
+      // await filterDoc.collection('all-filters').add({'filter': filterName});
+    }
+    await filterDoc.update({
+      'all-filters': allFilters,
+      'notes-filters': notesFilters,
+    });
   }
 
   // fn for fetching carouselItems from Firebase
@@ -124,7 +195,7 @@ class ItemsClass {
         'id': data.docs[i].data()['id'],
         'img': data.docs[i].data()['img'],
         'title': data.docs[i].data()['title'],
-        'price': data.docs[i].data()['price']
+        'price': data.docs[i].data()['price'],
       });
     }
   }
@@ -138,15 +209,19 @@ class ItemsClass {
         .add({
       'id': id,
       'title': item.title,
-      'shortInfo': item.shortInfo,
+      'description': item.description,
       'category': item.category,
-      'longInfo': item.longInfo,
+      'cover': item.cover,
+      'pages': item.pages,
+      'language': item.language,
+      'condition': item.condition,
       'price': item.price,
-      'images': item.imageLinks,
+      'images': item.images,
+      'time': item.time,
       'img': image,
+      'color': item.bgColor.toHex(),
     });
     await getCarouselItems();
-    print('Carousel Created');
   }
 
   static Future<void> deleteCarouselItem(String id) async {
@@ -172,7 +247,6 @@ class ItemsClass {
         .doc(doc)
         .delete();
     await getCarouselItems();
-    print('Doc Deleted');
   }
 
   // fn for fetching data from firebase
@@ -184,11 +258,17 @@ class ItemsClass {
     for (int i = 0; i < documents.length; i++) {
       final item = documents[i].data();
       final model = ItemForSaleModel(
-          imageLinks: item['images'],
+          tags: item['tags'] ?? [],
+          time: item['time'],
+          bgColor: HexColor(item['color']),
+          cover: item['cover'],
+          description: item['description'],
+          language: item['language'],
+          pages: item['pages'],
+          images: item['images'],
           title: item['title'],
           id: item['id'],
-          shortInfo: item['shortInfo'],
-          longInfo: item['longInfo'],
+          condition: item['condition'],
           price: item['price'],
           category: item['category']);
 
@@ -232,8 +312,9 @@ class ItemsClass {
     var mappedCategory = cat.data();
     categoryName =
         (mappedCategory?['category'] as List).map((e) => e as String).toList();
-            categoryImg =
-        (mappedCategory?['category-img'] as List).map((e) => e as String).toList();
+    categoryImg = (mappedCategory?['category-img'] as List)
+        .map((e) => e as String)
+        .toList();
   }
 
   // create a new Category
@@ -269,26 +350,34 @@ class OrdersClass {
   }
 
   static Future<void> getPendingOrders() async {
-    final data = await admin.doc('pending-orders').get();
-    final mapped = data.data() ?? {};
+    final data = await admin.doc('pending-orders').collection('orders').get();
 
     // orders variables
-    final cloudOrders = mapped['pending-orders'] ?? [];
+
     localData.value['pending-orders'] = [];
-    final localOrders = localData.value['pending-orders'] ?? [];
+    List localOrders = localData.value['pending-orders'];
 
     //loop to get data
-    for (int i = 0; i < cloudOrders.length; i++) {
-      localOrders.add({
-        'id': cloudOrders[i]['id'],
-        'uid': cloudOrders[i]['uid'],
-        'title': cloudOrders[i]['title'],
-        'shortInfo': cloudOrders[i]['shortInfo'],
-        'longInfo': cloudOrders[i]['longInfo'],
-        'quantity': cloudOrders[i]['quantity'],
-        'images': cloudOrders[i]['images'],
-        'status': cloudOrders[i]['status'],
-        'trackingID': cloudOrders[i]['trackingID']
+    for (int i = 0; i < data.docs.length; i++) {
+      final cloudOrders = data.docs[i].data();
+      (localData.value['pending-orders'] as List).add({
+        'id': cloudOrders['id'],
+        'uid': cloudOrders['uid'],
+        'title': cloudOrders['title'],
+        'description': cloudOrders['description'],
+        'color': cloudOrders['color'],
+        'cover': cloudOrders['cover'],
+        'condition': cloudOrders['condition'],
+        'purchase-time': cloudOrders['purchase-time'],
+        'time': cloudOrders['time'],
+        'pages': cloudOrders['pages'],
+        'price': cloudOrders['price'],
+        'address': cloudOrders['address'],
+        'language': cloudOrders['language'],
+        'quantity': cloudOrders['quantity'],
+        'images': cloudOrders['images'],
+        'status': cloudOrders['status'],
+        'trackingID': cloudOrders['trackingID']
       });
     }
   }
@@ -298,7 +387,7 @@ class OrdersClass {
     final mapped = data.data() ?? {};
 
     // orders variables
-    final cloudOrders = mapped['completed-orders'] ?? [];
+    final cloudOrders = mapped['orders'] ?? [];
     localData.value['completed-orders'] = [];
     final localOrders = localData.value['completed-orders'] ?? [];
 
@@ -308,8 +397,14 @@ class OrdersClass {
         'id': cloudOrders[i]['id'],
         'uid': cloudOrders[i]['uid'],
         'title': cloudOrders[i]['title'],
-        'shortInfo': cloudOrders[i]['shortInfo'],
-        'longInfo': cloudOrders[i]['longInfo'],
+        'description': cloudOrders[i]['description'],
+        'color': cloudOrders[i]['color'],
+        'cover': cloudOrders[i]['cover'],
+        'condition': cloudOrders[i]['condition'],
+        'purchase-time': cloudOrders['purchase-time'],
+        'time': cloudOrders['time'],
+        'pages': cloudOrders[i]['pages'],
+        'language': cloudOrders[i]['language'],
         'quantity': cloudOrders[i]['quantity'],
         'images': cloudOrders[i]['images'],
         'status': cloudOrders[i]['status'],
@@ -323,7 +418,7 @@ class OrdersClass {
     final mapped = data.data() ?? {};
 
     // orders variables
-    final cloudOrders = mapped['rejected-orders'] ?? [];
+    final cloudOrders = mapped['orders'] ?? [];
     localData.value['rejected-orders'] = [];
     final localOrders = localData.value['rejected-orders'] ?? [];
 
@@ -333,8 +428,14 @@ class OrdersClass {
         'id': cloudOrders[i]['id'],
         'uid': cloudOrders[i]['uid'],
         'title': cloudOrders[i]['title'],
-        'shortInfo': cloudOrders[i]['shortInfo'],
-        'longInfo': cloudOrders[i]['longInfo'],
+        'description': cloudOrders[i]['description'],
+        'color': cloudOrders[i]['color'],
+        'cover': cloudOrders[i]['cover'],
+        'condition': cloudOrders[i]['condition'],
+        'pages': cloudOrders[i]['pages'],
+        'purchase-time': cloudOrders['purchase-time'],
+        'time': cloudOrders['time'],
+        'language': cloudOrders[i]['language'],
         'quantity': cloudOrders[i]['quantity'],
         'images': cloudOrders[i]['images'],
         'status': cloudOrders[i]['status'],
@@ -355,20 +456,40 @@ class OrdersClass {
     }
   }
 
-  static Future<void> updateOrder(
-      {String? uid, String? orderID, String? newStatus}) async {
-    // fetching currentOrders
-    final userOrderSnap =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final userOrdersMap = userOrderSnap.data() ?? {};
-    List<Map> orders = userOrdersMap['orders'];
-    final index = orders.indexWhere((element) => element['id'] == orderID);
-    orders[index]['status'] = newStatus.toString().toUpperCase();
+  static Future<void> updateStatus(
+      String uid, String orderID, String newStatus) async {
+    // update status in Users account
+    final usercollection = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('orders')
+        .get();
+    final id = usercollection.docs
+        .where((element) => element['id'] == orderID && element['uid'] == uid)
+        .first
+        .id;
 
-    print(orders);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('orders')
+        .doc(id)
+        .update({
+      'status': newStatus,
+    });
 
-    // after fetching and updating list of specific user upload it back to firestore
-    final userDoc =
-        FirebaseFirestore.instance.collection('users').doc(uid).update({});
+    // updte status in admin panel
+    final admincollection = await FirebaseFirestore.instance
+        .collection('admin')
+        .doc('pending-orders')
+        .collection('orders')
+        .get();
+    final adminId = admincollection.docs
+        .where((element) => element['id'] == orderID && element['uid'] == uid)
+        .first
+        .id;
+    await admin.doc('pending-orders').collection('orders').doc(adminId).update({
+      'status': newStatus,
+    });
   }
 }

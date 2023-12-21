@@ -20,9 +20,9 @@ class _CompletedOrdersScreenState extends State<CompletedOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(defaultPadding),
+      body: Padding(
+        padding: const EdgeInsets.all(defaultPadding),
+        child: SingleChildScrollView(
           child: Column(
             children: [
               const Header(title: 'Completed Orders', widget: SizedBox()),
@@ -53,52 +53,53 @@ class _CompletedOrdersScreenState extends State<CompletedOrdersScreen> {
         builder: (_, value, child) {
           return (localData.value['completed-orders'] ?? []).isEmpty
               ? const EmptyScreen()
-              :  ListView.builder(
-            itemBuilder: (context, idx) {
-              final data = (localData.value['completed-orders'] ?? [])[idx];
-              return Padding(
-                padding: const EdgeInsets.all(4.0),
-                child: Card(
-                  shape: const ContinuousRectangleBorder(),
-                  child: ListTile(
-                      isThreeLine: true,
-                      leading: Image.network(
-                        data['images'][0],
-                        width: Responsive.isDesktop(context) ? 100 : 50,
+              : ListView.builder(
+                  itemBuilder: (context, idx) {
+                    final data =
+                        (localData.value['completed-orders'] ?? [])[idx];
+                    return Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Card(
+                        shape: const ContinuousRectangleBorder(),
+                        child: ListTile(
+                            isThreeLine: true,
+                            leading: Image.network(
+                              data['images'][0],
+                              width: Responsive.isDesktop(context) ? 100 : 50,
+                            ),
+                            title: Text(
+                              '${data['title']}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            subtitle: Text('By user - ${data['uid']}'),
+                            onTap: () {
+                              final order = OrderModel(
+                                address: data['address'],
+                                id: data['id'] ?? '',
+                                images: data['images'] ?? '',
+                                price: data['price'] ?? '',
+                                quantity: data['quantity'] ?? 1,
+                                status: data['status'] ?? '',
+                                title: data['title'] ?? '',
+                                trackingId: data['trackingId'] ?? '',
+                                uid: data['uid'] ?? '',
+                              );
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => UpdateOrderScreen(
+                                      index: idx,
+                                      order: order,
+                                    ),
+                                  ));
+                            }),
                       ),
-                      title: Text(
-                        '${data['title']}',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      subtitle: Text('By user - ${data['uid']}'),
-                      onTap: () {
-                        final order = OrderModel(
-                          id: data['id'] ?? '',
-                          images: data['images'] ?? '',
-                          longInfo: data['longInfo'] ?? '',
-                          price: data['price'] ?? '',
-                          quantity: data['quantity'] ?? 1,
-                          shortInfo: data['shortInfo'] ?? '',
-                          status: data['status'] ?? '',
-                          title: data['title'] ?? '',
-                          trackingID: data['trackingID'] ?? '',
-                          uid: data['uid'] ?? '',
-                        );
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UpdateOrderScreen(
-                                order: order,
-                              ),
-                            ));
-                      }),
-                ),
-              );
-            },
-            itemCount: localData.value['completed-orders']!.length,
-            shrinkWrap: true,
-            primary: false,
-          );
+                    );
+                  },
+                  itemCount: localData.value['completed-orders']!.length,
+                  shrinkWrap: true,
+                  primary: false,
+                );
         },
       ),
     );

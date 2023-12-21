@@ -84,7 +84,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 0;
               setState(() {});
-           
             },
           ),
           DrawerListTile(
@@ -94,8 +93,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 1;
               setState(() {});
-              
-
             },
           ),
           DrawerListTile(
@@ -105,8 +102,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 2;
               setState(() {});
-           
-
             },
           ),
           DrawerListTile(
@@ -116,8 +111,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 3;
               setState(() {});
-             
-
             },
           ),
           DrawerListTile(
@@ -127,8 +120,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 4;
               setState(() {});
-          
-
             },
           ),
           DrawerListTile(
@@ -138,8 +129,15 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 5;
               setState(() {});
-           
-
+            },
+          ),
+          DrawerListTile(
+            index: 5,
+            title: "Filters",
+            svgSrc: "assets/icons/menu_task.svg",
+            press: () {
+              currentIndex = 10;
+              setState(() {});
             },
           ),
           DrawerListTile(
@@ -149,8 +147,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 6;
               setState(() {});
-            
-
             },
           ),
           DrawerListTile(
@@ -169,8 +165,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 7;
               setState(() {});
-            
-
             },
           ),
           DrawerListTile(
@@ -180,8 +174,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 8;
               setState(() {});
-             
-
             },
           ),
           DrawerListTile(
@@ -191,8 +183,6 @@ class _MainScreenState extends State<MainScreen> {
             press: () {
               currentIndex = 9;
               setState(() {});
-             
-
             },
           ),
         ],
