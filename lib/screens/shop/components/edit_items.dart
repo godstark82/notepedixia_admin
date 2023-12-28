@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
+import 'package:get/get.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/const/constants.dart';
@@ -26,6 +27,7 @@ class EditItemsToAppScreen extends StatefulWidget {
       required this.language,
       required this.imageLinks,
       required this.tags,
+      required this.isNotes,
       required this.title});
   final String title;
   final String description;
@@ -38,6 +40,7 @@ class EditItemsToAppScreen extends StatefulWidget {
   final String idx;
   final String category;
   final List imageLinks;
+  final bool isNotes;
 
   @override
   State<EditItemsToAppScreen> createState() => _EditItemsToAppScreenState();
@@ -53,16 +56,12 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
   String price = '';
   String dropDownValue = '';
   List imageLink = [];
-  List tags = [];
-
-  List<DropdownMenuItem> createCategories() {
-    return List.generate(
-        categoryName.length,
-        (index) => DropdownMenuItem(
-              value: categoryName[index].toString(),
-              child: Text(categoryName[index].toString()),
-            ));
-  }
+  String currentTag = '';
+  List selectedTags = [];
+  List<DropdownMenuItem>? categories;
+  List<DropdownMenuItem>? tags;
+  String pdfFile = '';
+  String notesUrl = '';
 
   @override
   void initState() {
@@ -73,11 +72,28 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
     description = widget.description;
     pages = widget.pages;
     language = widget.language;
-    tags = widget.tags;
+    selectedTags = widget.tags;
     dropDownValue = widget.category;
     imageLink = widget.imageLinks;
     super.initState();
-    createCategories();
+    categories = List.generate(
+        categoryName.length,
+        (index) => DropdownMenuItem(
+              value: categoryName[index].toString(),
+              child: Text(categoryName[index].toString()),
+            ));
+    tags = List.generate(
+        widget.isNotes == true
+            ? (localData.value['notes-filters'] as List).length
+            : (localData.value['all-filters'] as List).length,
+        (index) => DropdownMenuItem(
+              value: widget.isNotes == true
+                  ? (localData.value['notes-filters'] as List)[index].toString()
+                  : (localData.value['all-filters'] as List)[index].toString(),
+              child: Text(widget.isNotes == true
+                  ? (localData.value['notes-filters'] as List)[index]
+                  : (localData.value['all-filters'] as List)[index]),
+            ));
   }
 
   @override
@@ -205,7 +221,7 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
                           color: Colors.transparent,
                         ),
                         value: widget.category,
-                        items: createCategories(),
+                        items: categories,
                         onChanged: (value) {
                           dropDownValue = value;
                           setState(() {});
@@ -263,6 +279,69 @@ class _EditItemsToAppScreenState extends State<EditItemsToAppScreen> {
                           border: OutlineInputBorder(),
                           label: Text('Short Description')),
                     )),
+                const SizedBox(height: defaultPadding),
+                addList(
+                    'Tags',
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white),
+                            child: DropdownButton(
+                              style: const TextStyle(color: Colors.black),
+                              iconEnabledColor: Colors.black,
+                              dropdownColor: Colors.white,
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              underline: const Divider(
+                                color: Colors.transparent,
+                              ),
+                              value: currentTag != ''
+                                  ? currentTag
+                                  : tags?.first.value,
+                              items: tags,
+                              onChanged: (value) {
+                                currentTag = value;
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              if (selectedTags.contains(currentTag) == false) {
+                                selectedTags.add(currentTag);
+                                setState(() {});
+                              } else {
+                                Get.snackbar('Error', 'Duplicate Item');
+                              }
+                            },
+                            child: const Text('Add Tag'))
+                      ],
+                    )),
+                if (widget.isNotes)
+                  ExpansionTile(
+                    title: const Text('PDF FILE'),
+                    subtitle: const Text('Click to View PDF Link'),
+                    trailing: IconButton(
+                        onPressed: () async {
+                          final dlLink = await ItemsClass.pickPdf(title);
+                          pdfFile = dlLink;
+                          Get.snackbar('UPLOADED', 'PDF SUCCESSFULLY UPLOADED');
+                          setState(() {});
+                        },
+                        icon: const Icon(Icons.upload)),
+                    children: [
+                      ListTile(
+                        isThreeLine: true,
+                        leading: const Text('Name'),
+                        title: Text(title),
+                        subtitle: Text(pdfFile),
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: defaultPadding),
                 addList(
                     'Images',

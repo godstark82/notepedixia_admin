@@ -132,18 +132,9 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
           DrawerListTile(
-            index: 5,
+            index: 6,
             title: "Filters",
             svgSrc: "assets/icons/menu_task.svg",
-            press: () {
-              currentIndex = 10;
-              setState(() {});
-            },
-          ),
-          DrawerListTile(
-            index: 6,
-            title: "Store",
-            svgSrc: "assets/icons/menu_store.svg",
             press: () {
               currentIndex = 6;
               setState(() {});
@@ -151,6 +142,24 @@ class _MainScreenState extends State<MainScreen> {
           ),
           DrawerListTile(
             index: 7,
+            title: "Store",
+            svgSrc: "assets/icons/menu_store.svg",
+            press: () {
+              currentIndex = 7;
+              setState(() {});
+            },
+          ),
+          DrawerListTile(
+            index: 8,
+            title: "Notes",
+            svgSrc: "assets/icons/menu_store.svg",
+            press: () {
+              currentIndex = 8;
+              setState(() {});
+            },
+          ),
+          DrawerListTile(
+            index: 9,
             title: "Notifications",
             badge: notifications.isNotEmpty
                 ? Container(
@@ -163,25 +172,25 @@ class _MainScreenState extends State<MainScreen> {
                 : const SizedBox(),
             svgSrc: "assets/icons/menu_notification.svg",
             press: () {
-              currentIndex = 7;
+              currentIndex = 9;
               setState(() {});
             },
           ),
           DrawerListTile(
-            index: 8,
+            index: 10,
             title: "Profile",
             svgSrc: "assets/icons/menu_profile.svg",
             press: () {
-              currentIndex = 8;
+              currentIndex = 10;
               setState(() {});
             },
           ),
           DrawerListTile(
-            index: 9,
+            index: 11,
             title: "Settings",
             svgSrc: "assets/icons/menu_setting.svg",
             press: () {
-              currentIndex = 9;
+              currentIndex = 11;
               setState(() {});
             },
           ),

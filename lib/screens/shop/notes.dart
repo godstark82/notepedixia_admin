@@ -4,21 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/const/helper/empty_screen.dart';
-import 'package:notepedixia_admin/func/functions.dart';
-import 'package:notepedixia_admin/models/itemforsell_model.dart';
 import 'package:notepedixia_admin/const/responsive.dart';
+import 'package:notepedixia_admin/func/functions.dart';
 import 'package:notepedixia_admin/screens/dashboard/components/header.dart';
 import 'package:notepedixia_admin/screens/shop/components/add_item.dart';
 import 'package:notepedixia_admin/screens/shop/components/edit_items.dart';
 
-class ShopScreen extends StatefulWidget {
-  const ShopScreen({super.key});
+class NotesScreen extends StatefulWidget {
+  const NotesScreen({super.key});
 
   @override
-  State<ShopScreen> createState() => _ShopScreenState();
+  State<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _ShopScreenState extends State<ShopScreen> {
+class _NotesScreenState extends State<NotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +26,7 @@ class _ShopScreenState extends State<ShopScreen> {
           padding: const EdgeInsets.all(defaultPadding),
           child: Column(children: [
             Header(
-                title: "Shop",
+                title: "Notes",
                 widget: ElevatedButton.icon(
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(
@@ -41,7 +40,7 @@ class _ShopScreenState extends State<ShopScreen> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const AddItemsToAppScreen(
-                                  isNotes: false,
+                                  isNotes: true,
                                 )));
                   },
                   icon: const Icon(Icons.add),
@@ -62,9 +61,11 @@ class _ShopScreenState extends State<ShopScreen> {
         color: secondaryColor,
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
-      child: ValueListenableBuilder<List<ItemForSaleModel>>(
-        valueListenable: shopItems,
+      child: ValueListenableBuilder(
+        valueListenable: localData,
         builder: (_, value, child) {
+          final item = notesItems.value;
+
           return value.isEmpty
               ? const EmptyScreen()
               : ListView.separated(
@@ -73,7 +74,7 @@ class _ShopScreenState extends State<ShopScreen> {
                   },
                   itemBuilder: (context, idx) {
                     return ListTile(
-                      title: Text('${value[idx].title}'),
+                      title: Text(item[idx].title.toString()),
                       leading: Text('${idx + 1}'),
                       trailing: SizedBox(
                         width: Responsive.isDesktop(context) ? 175 : 125,
@@ -81,7 +82,7 @@ class _ShopScreenState extends State<ShopScreen> {
                           children: [
                             MaterialButton(
                                 onPressed: () async {
-                                  await ItemsClass.deleteItem(idx, false);
+                                  await ItemsClass.deleteItem(idx, true);
                                   setState(() {});
                                 },
                                 child: const Icon(
@@ -95,7 +96,7 @@ class _ShopScreenState extends State<ShopScreen> {
                                       MaterialPageRoute(
                                           builder: (context) =>
                                               EditItemsToAppScreen(
-                                                isNotes: false,
+                                                isNotes: true,
                                                 tags: value[idx].tags,
                                                 idx: value[idx].id!,
                                                 imageLinks: value[idx].images,
@@ -120,7 +121,7 @@ class _ShopScreenState extends State<ShopScreen> {
                       ),
                     );
                   },
-                  itemCount: value.length,
+                  itemCount: item.length,
                   shrinkWrap: true,
                   primary: false,
                 );

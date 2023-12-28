@@ -22,7 +22,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
   String dropDownValue = '';
   List<String> imagesLinks = [];
   Future<List<DropdownMenuItem>> allOrders() async {
-    final item = items.value.isEmpty
+    final item = shopItems.value.isEmpty
         ? <DropdownMenuItem>[
             const DropdownMenuItem(
               value: 'd',
@@ -30,10 +30,10 @@ class _CarouselScreenState extends State<CarouselScreen> {
             )
           ]
         : List.generate(
-            items.value.length,
+            shopItems.value.length,
             (index) => DropdownMenuItem(
-                  value: items.value[index].id.toString(),
-                  child: Text(items.value[index].title.toString()),
+                  value: shopItems.value[index].id.toString(),
+                  child: Text(shopItems.value[index].title.toString()),
                 ));
     return item;
   }
@@ -174,9 +174,9 @@ class _CarouselScreenState extends State<CarouselScreen> {
                   //
                   // function to add this item in the carousel
                   // will be here
-                  final index = items.value
+                  final index = shopItems.value
                       .indexWhere((element) => dropDownValue == element.id);
-                  final item = items.value[index];
+                  final item = shopItems.value[index];
                   ItemsClass.createCarouselItems(
                       ItemForSaleModel(
                           tags: item.tags,
@@ -221,7 +221,7 @@ class _CarouselScreenState extends State<CarouselScreen> {
           ),
         ],
       ),
-      body: items.value.isEmpty
+      body: shopItems.value.isEmpty
           ? const Center(child: Text('Add Items in Shop First'))
           : StatefulBuilder(builder: (context, ststate) {
               return Container(

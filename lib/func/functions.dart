@@ -26,6 +26,7 @@ library;
 import 'dart:typed_data';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:hexcolor/hexcolor.dart';
@@ -43,7 +44,6 @@ class ItemsClass {
   // initializing all init functions
   static init() async {
     await getItems();
-
     await getCategories();
     await getCarouselItems();
     await getFilters();
@@ -71,6 +71,7 @@ class ItemsClass {
       required String? pages,
       required List tags,
       String? time,
+      required String? pdf,
       required String? condition,
       required String? cover,
       required String? language}) async {
@@ -96,6 +97,7 @@ class ItemsClass {
       'tags': tags,
       'condition': condition,
       'pages': pages,
+      'pdf': pdf ?? 'Not Available',
       'time': DateTime.now().toString(),
       'language': language,
       'color': bgColor,
@@ -122,6 +124,7 @@ class ItemsClass {
       String? language,
       String? description,
       String? time,
+      String? pdf,
       String? title}) async {
     await firestore.collection('items').doc(id).update({
       'title': title,
@@ -130,6 +133,7 @@ class ItemsClass {
       'category': category,
       'description': description,
       'cover': cover,
+      'pdf': pdf ?? 'Not Available',
       'language': language,
       'pages': pages,
       'condition': condition,
@@ -249,9 +253,12 @@ class ItemsClass {
     await getCarouselItems();
   }
 
+  // fn for getting all Notes from Firestire
+
   // fn for fetching data from firebase
   static Future getItems() async {
-    items.value.clear();
+    shopItems.value.clear();
+    notesItems.value.clear();
     final data = await firestore.collection('items').get();
     final documents = data.docs;
     final List<ItemForSaleModel> listmodel = [];
@@ -277,12 +284,23 @@ class ItemsClass {
     listmodel.sort(
       (a, b) => int.parse(b.id!).compareTo(int.parse(a.id!)),
     );
-    items.value.addAll(listmodel);
+    shopItems.value
+        .addAll(listmodel.where((element) => element.category != 'Notes'));
+    notesItems.value
+        .addAll(listmodel.where((element) => element.category == 'Notes'));
   }
 
-  static Future<void> deleteItem(int index) async {
-    String id = items.value[index].id!;
-    items.value.removeAt(index);
+  static Future<void> deleteItem(int index, bool isNotes) async {
+    String id = '';
+    if (isNotes) {
+      String uid = notesItems.value[index].id!;
+      id = uid;
+      notesItems.value.removeAt(index);
+    } else {
+      String uid = shopItems.value[index].id!;
+      id = uid;
+      shopItems.value.removeAt(index);
+    }
     firestore.collection('items').doc(id).delete();
   }
 
@@ -305,6 +323,36 @@ class ItemsClass {
     await ref.putData(file!, metadata);
     final dlLink = await ref.getDownloadURL();
     return dlLink;
+  }
+
+  // Method to upload pdf to Firebase
+  static Future<String> uploadPdf(String fileName, Uint8List file) async {
+    final ref = FirebaseStorage.instance.ref().child('pdfs/$fileName.pdf');
+
+    final uploadTask = ref.putData(file);
+
+    await uploadTask.whenComplete(() {});
+
+    final dlLink = await ref.getDownloadURL();
+
+    return dlLink;
+  }
+
+  static Future<String> pickPdf(String order) async {
+    String link = '';
+    final pickedFiles = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+
+    if (pickedFiles != null) {
+      String fileName = DateTime.now().toString();
+      Uint8List file = pickedFiles.files.first.bytes!;
+
+      final downloadLink = await uploadPdf(fileName, file);
+    } else {
+      debugPrint('Picked File is null');
+    }
+    debugPrint('Pdf Uploaded Successfully');
+    return link;
   }
 
   static Future getCategories() async {

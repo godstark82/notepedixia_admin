@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_loader/flutter_overlay_loader.dart';
+import 'package:get/get.dart';
 import 'package:notepedixia_admin/const/database.dart';
 import 'package:notepedixia_admin/const/constants.dart';
 import 'package:notepedixia_admin/func/functions.dart';
@@ -10,7 +11,8 @@ import 'package:notepedixia_admin/screens/main/main_screen.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class AddItemsToAppScreen extends StatefulWidget {
-  const AddItemsToAppScreen({super.key});
+  const AddItemsToAppScreen({super.key, required this.isNotes});
+  final bool isNotes;
 
   @override
   State<AddItemsToAppScreen> createState() => _AddItemsToAppScreenState();
@@ -25,22 +27,33 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
   String language = '';
   String price = '';
   String dropDownValue = '';
-  List<String> tags = [];
   List<String> imagesLinks = [];
-
-  List<DropdownMenuItem> createCategories() {
-    return List.generate(
-        categoryName.length,
-        (index) => DropdownMenuItem(
-              value: categoryName[index].toString(),
-              child: Text(categoryName[index].toString()),
-            ));
-  }
+  String pdfFile = '';
+  String currentTag = '';
+  List<String> selectedTags = [];
+  List<DropdownMenuItem>? categories;
+  List<DropdownMenuItem>? tags;
 
   @override
   void initState() {
     super.initState();
-    createCategories();
+    categories = List.generate(
+        categoryName.length - 1,
+        (index) => DropdownMenuItem(
+            value: categoryName[index + 1].toString(),
+            child: Text(categoryName[index + 1].toString())));
+    tags = List.generate(
+        widget.isNotes == true
+            ? (localData.value['notes-filters'] as List).length
+            : (localData.value['all-filters'] as List).length,
+        (index) => DropdownMenuItem(
+              value: widget.isNotes == true
+                  ? (localData.value['notes-filters'] as List)[index].toString()
+                  : (localData.value['all-filters'] as List)[index].toString(),
+              child: Text(widget.isNotes == true
+                  ? (localData.value['notes-filters'] as List)[index]
+                  : (localData.value['all-filters'] as List)[index]),
+            ));
   }
 
   @override
@@ -76,7 +89,8 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                       overlayColor: Colors.white.withOpacity(0.1));
                   await ItemsClass.createItem(
                     imagesLinks,
-                    tags: tags,
+                    tags: selectedTags,
+                    pdf: widget.isNotes ? pdfFile : 'No Need',
                     ordertitle: title,
                     cover: cover,
                     language: language,
@@ -84,9 +98,9 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                     pages: pages,
                     price: price,
                     description: description,
-                    category: dropDownValue != ''
-                        ? dropDownValue
-                        : createCategories().first.value,
+                    category: widget.isNotes == true
+                        ? 'Notes'
+                        : categories?.first.value,
                   );
                   Navigator.push(
                       context,
@@ -127,6 +141,7 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Name Text Field
                 addList(
                   'Name',
                   SizedBox(
@@ -156,32 +171,34 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: defaultPadding),
-                addList(
-                    'Category',
-                    Container(
-                      width: 100,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.white),
-                      child: DropdownButton(
-                        style: const TextStyle(color: Colors.black),
-                        iconEnabledColor: Colors.black,
-                        dropdownColor: Colors.white,
-                        padding: const EdgeInsets.only(left: 8, right: 8),
-                        underline: const Divider(
-                          color: Colors.transparent,
+                if (widget.isNotes == false)
+                  const SizedBox(height: defaultPadding),
+                if (widget.isNotes == false)
+                  addList(
+                      'Category',
+                      Container(
+                        width: 100,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.white),
+                        child: DropdownButton(
+                          style: const TextStyle(color: Colors.black),
+                          iconEnabledColor: Colors.black,
+                          dropdownColor: Colors.white,
+                          padding: const EdgeInsets.only(left: 8, right: 8),
+                          underline: const Divider(
+                            color: Colors.transparent,
+                          ),
+                          value: dropDownValue != ''
+                              ? dropDownValue
+                              : categories?.first.value,
+                          items: categories,
+                          onChanged: (value) {
+                            dropDownValue = value;
+                            setState(() {});
+                          },
                         ),
-                        value: dropDownValue != ''
-                            ? dropDownValue
-                            : createCategories().first.value,
-                        items: createCategories(),
-                        onChanged: (value) {
-                          dropDownValue = value;
-                          setState(() {});
-                        },
-                      ),
-                    )),
+                      )),
                 const SizedBox(height: defaultPadding),
                 addList(
                     'description',
@@ -235,26 +252,27 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(), label: Text('Cover')),
                     )),
-                if (tags.isNotEmpty) const SizedBox(height: defaultPadding),
-                if (tags.isNotEmpty)
+                if (selectedTags.isNotEmpty)
+                  const SizedBox(height: defaultPadding),
+                if (selectedTags.isNotEmpty)
                   SizedBox(
                     height: 50,
                     child: ListView.builder(
-                        itemCount: tags.length,
+                        itemCount: selectedTags.length,
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context, index) => Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4),
                               child: Chip(
-                                label: Text(tags[index]),
+                                label: Text(selectedTags[index]),
                                 deleteButtonTooltipMessage: 'Delete',
                                 deleteIcon: const Icon(
                                   Icons.close,
                                   color: Colors.red,
                                 ),
                                 onDeleted: () {
-                                  tags.removeAt(index);
+                                  selectedTags.removeAt(index);
                                   setState(() {});
                                 },
                               ),
@@ -262,23 +280,71 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
                   ),
                 const SizedBox(height: defaultPadding),
                 addList(
-                  'Tags',
-                  Row(children: [
-                    Expanded(
-                        child: TextFormField(
-                      decoration: const InputDecoration(
-                          border: OutlineInputBorder(), label: Text('Tags')),
-                      controller: _tagController,
+                    'Tags',
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            width: 100,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white),
+                            child: DropdownButton(
+                              style: const TextStyle(color: Colors.black),
+                              iconEnabledColor: Colors.black,
+                              dropdownColor: Colors.white,
+                              padding: const EdgeInsets.only(left: 8, right: 8),
+                              underline: const Divider(
+                                color: Colors.transparent,
+                              ),
+                              value: currentTag != ''
+                                  ? currentTag
+                                  : tags?.first.value,
+                              items: tags,
+                              onChanged: (value) {
+                                currentTag = value;
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              if (currentTag.isNotEmptyAndNotNull) {
+                                if (selectedTags.contains(currentTag) ==
+                                    false) {
+                                  selectedTags.add(currentTag);
+                                  setState(() {});
+                                } else {
+                                  Get.snackbar('Error', 'Duplicate Item');
+                                }
+                              }
+                            },
+                            child: const Text('Add Tag'))
+                      ],
                     )),
-                    TextButton(
+                const SizedBox(height: defaultPadding),
+                if (widget.isNotes)
+                  ExpansionTile(
+                    title: const Text('PDF FILE'),
+                    subtitle: const Text('Click to View PDF Link'),
+                    trailing: IconButton(
                         onPressed: () async {
-                          tags.add(_tagController.text);
-                          _tagController.clear();
+                          final dlLink = await ItemsClass.pickPdf(title);
+                          pdfFile = dlLink;
+                          Get.snackbar('UPLOADED', 'PDF SUCCESSFULLY UPLOADED');
                           setState(() {});
                         },
-                        child: "Add Tag".text.make())
-                  ]),
-                ),
+                        icon: const Icon(Icons.upload)),
+                    children: [
+                      ListTile(
+                        isThreeLine: true,
+                        leading: const Text('Name'),
+                        title: Text(title),
+                        subtitle: Text(pdfFile),
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: defaultPadding),
                 addList(
                     'Images',
@@ -306,8 +372,6 @@ class _AddItemsToAppScreenState extends State<AddItemsToAppScreen> {
       ),
     );
   }
-
-  final TextEditingController _tagController = TextEditingController();
 
   Widget addList(String heading, Widget widget) {
     return Row(

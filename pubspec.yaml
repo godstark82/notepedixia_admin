@@ -50,6 +50,7 @@ dependencies:
   palette_generator: ^0.3.3+3
   cached_network_image: ^3.3.0
   hexcolor: ^3.0.1
+  file_picker: ^6.1.1
 
 dev_dependencies:
   flutter_test:
